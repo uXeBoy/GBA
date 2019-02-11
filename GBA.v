@@ -21,9 +21,9 @@ reg risingRD, fallingRD, fallingCS;
 reg [1:3] resyncRD;
 reg [1:3] resyncCS;
 
-always @(posedge clk100)
+always @(posedge clk)
 begin
-  if (fallingRD) gba_data_out <= rom[gba_addr_lo[8:0]];
+  if (fallingRD && gba_addr_lo < 511) gba_data_out = rom[gba_addr_lo[8:0]];
   if (risingRD) gba_addr_lo <= gba_addr_lo + 1'b1;
   else if (fallingCS) gba_addr_lo <= gba_addr_lo_in;
 
@@ -47,6 +47,21 @@ SB_IO #(
     .OUTPUT_ENABLE((!GBACART_RD && !GBACART_CS)),
     .D_OUT_0(gba_data_out[15:0]),
     .D_IN_0(gba_addr_lo_in[15:0])
+);
+
+wire clk;
+
+SB_PLL40_PAD #(
+    .FEEDBACK_PATH ("SIMPLE"),
+    .DIVR (4'b0111),
+    .DIVF (7'b0101010),
+    .DIVQ (3'b011),
+    .FILTER_RANGE (3'b001)
+) uut (
+    .RESETB         (1'b1),
+    .BYPASS         (1'b0),
+    .PACKAGEPIN     (clk100),
+    .PLLOUTGLOBAL   (clk) // 67.120 MHz (requested) 67.188 MHz (achieved)
 );
 
 endmodule
