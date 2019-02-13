@@ -23,7 +23,7 @@ reg [1:3] resyncCS;
 
 always @(posedge clk)
 begin
-  if (fallingRD && gba_addr_lo < 511) gba_data_out = rom[gba_addr_lo[8:0]];
+  if (fallingRD && (gba_addr_lo < 16'd511)) gba_data_out = rom[gba_addr_lo[8:0]];
   if (risingRD) gba_addr_lo <= gba_addr_lo + 1'b1;
   else if (fallingCS) gba_addr_lo <= gba_addr_lo_in;
 
